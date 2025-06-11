@@ -7700,18 +7700,60 @@ function cropFind () {
 				if( dA > dB ) return 1;
 				return 0;
 			});
-		var newT = $e('TABLE',[['id','reportWrapper'],['class',allIDs[7]],['style','width:100%;']]);
-		if (neFL) {
-			var tHead = $ee('THEAD',$em('TR',[$c(''),$c(''),$c(''),$c(trImg('iExperience'),[['class','body']]),$c($em('div',[$e('i',[['class','resources_small']]),"/",trImg('def1')]),[['style','width:52px']]),$c(''),$c(''),$c('<->')]));
-		} else {
-			var tHead = $ee('THEAD',$em('TR',[$c(''),$c(''),$c(''),$c('<->')]));
-		}
-		var tBody = $ee('THEAD');
-		newT.appendChild(tHead);
-		newT.appendChild(tBody);
-		oasis.sort(function(a,b){return parseInt(b[2])-parseInt(a[2]);});
-		for( var i=0; i<aCCs.length; i++ ) {
-			if( neFL ) {
+                var newT = $e('TABLE',[['id','reportWrapper'],['class',allIDs[7]],['style','width:100%;']]);
+               if (neFL) {
+                        var xpH   = $a(trImg('iExperience'),[['href',jsVoid]]);
+                        var rdH   = $a($em('div',[$e('i',[['class','resources_small']]),"/",trImg('def1')]),[['href',jsVoid]]);
+                        var distH = $a('<->',[['href',jsVoid]]);
+                        var tHead = $ee('THEAD',$em('TR',[
+                                $c(''),
+                                $c(''),
+                                $c(''),
+                                $c(xpH,[['class','body']]),
+                                $c(rdH,[['style','width:52px']]),
+                                $c(''),
+                                $c(''),
+                                $c(distH)
+                        ]));
+                } else {
+                        var distH = $a('<->',[['href',jsVoid]]);
+                        var tHead = $ee('THEAD',$em('TR',[$c(''),$c(''),$c(''),$c(distH)]));
+                }
+                var tBody = $ee('THEAD');
+                newT.appendChild(tHead);
+                newT.appendChild(tBody);
+
+               var lastSD = 0;
+               var lastSC = -1;
+               function sortNeighbors(sc, descFirst){
+                       var nArr = [];
+                       for(var i=0;i<tBody.rows.length;i++){
+                               var val = parseFloat(tBody.rows[i].cells[sc].textContent.replace(/[^0-9.,-]/g,'').replace(',', '.'));
+                               if(isNaN(val)) val = Infinity;
+                               nArr[i] = [val,tBody.rows[i]];
+                       }
+                       if(lastSC==sc){
+                               lastSD = 1 - lastSD;
+                       } else {
+                               lastSC = sc;
+                               lastSD = descFirst ? 1 : 0;
+                       }
+                       nArr.sort(function(a,b){return a[0]-b[0];});
+                       if(lastSD) nArr.reverse();
+                       for(var i=0;i<nArr.length;i++) tBody.appendChild(nArr[i][1]);
+               }
+
+               if(neFL){
+                       xpH.addEventListener('click',function(){sortNeighbors(3,true);},false);
+                       rdH.addEventListener('click',function(){sortNeighbors(4,true);},false);
+                       distH.addEventListener('click',function(){sortNeighbors(7);},false);
+               } else {
+                       distH.addEventListener('click',function(){sortNeighbors(3);},false);
+               }
+
+                oasis.sort(function(a,b){return parseInt(b[2])-parseInt(a[2]);});
+                for( var i=0; i<aCCs.length; i++ ) {
+                        if( neFL ) {
 				tBody.appendChild($em('TR',[
 					$c((typeof aCCs[i][3].uid != "undefined" ? $em('A',[aCCs[i][0],(aCCs[i][3].v<8?$e('i',[['class','tribe'+aCCs[i][3].v+'_small']]):"")],[['href','/profile/'+aCCs[i][3].uid[0]]]):"")),
 					$c((typeof aCCs[i][3].aid != "undefined" ? ($a(aCCs[i][3].aid[1],[['href','/alliance/'+aCCs[i][3].aid[0]]])):"")),
@@ -7756,11 +7798,13 @@ function cropFind () {
 				tBody.appendChild($em('TR',[$c(aCCs[i][0]),$c(oasisCC>0?$em('div',[$e('i',[['class','r4']]),'+'+oasisCC+'%']):''),
 					$c($a(aCCs[i][1]+'|'+aCCs[i][2],[['href','karte.php?'+'x='+aCCs[i][1]+'&y='+aCCs[i][2]]])),
 					$c(calcDistance(xy2id(aCCs[i][1],aCCs[i][2]), cell_id).toFixed(1))]));
-			}
-		}
-		cont.appendChild($ee('P',newT,[['id',allIDs[18]],['style','margin:10px 15px 0px;padding-bottom:15px;']]));
-		addSpeedAndRTSend($g(allIDs[18]));
-		addRefIGM(allIDs[18]);
+                        }
+                }
+                lastSC = neFL ? 7 : 3;
+                lastSD = 0;
+                cont.appendChild($ee('P',newT,[['id',allIDs[18]],['style','margin:10px 15px 0px;padding-bottom:15px;']]));
+                addSpeedAndRTSend($g(allIDs[18]));
+                addRefIGM(allIDs[18]);
 		neFL = false;
 		iaFL = false;
 	}
