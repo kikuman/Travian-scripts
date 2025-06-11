@@ -7701,10 +7701,14 @@ function cropFind () {
 				return 0;
 			});
                 var newT = $e('TABLE',[['id','reportWrapper'],['class',allIDs[7]],['style','width:100%;']]);
+
                if (neFL) {
                         var xpH   = $a(trImg('iExperience'),[['href',jsVoid]]);
                         var rdH   = $a($em('div',[$e('i',[['class','resources_small']]),"/",trImg('def1')]),[['href',jsVoid]]);
                         var distH = $a('<->',[['href',jsVoid]]);
+
+
+
                         var tHead = $ee('THEAD',$em('TR',[
                                 $c(''),
                                 $c(''),
@@ -7713,15 +7717,20 @@ function cropFind () {
                                 $c(rdH,[['style','width:52px']]),
                                 $c(''),
                                 $c(''),
+
                                 $c(distH)
                         ]));
                 } else {
                         var distH = $a('<->',[['href',jsVoid]]);
                         var tHead = $ee('THEAD',$em('TR',[$c(''),$c(''),$c(''),$c(distH)]));
+
+
+
                 }
                 var tBody = $ee('THEAD');
                 newT.appendChild(tHead);
                 newT.appendChild(tBody);
+
 
                var lastSD = 0;
                var lastSC = -1;
@@ -7754,6 +7763,9 @@ function cropFind () {
                 oasis.sort(function(a,b){return parseInt(b[2])-parseInt(a[2]);});
                 for( var i=0; i<aCCs.length; i++ ) {
                         if( neFL ) {
+
+
+
 				tBody.appendChild($em('TR',[
 					$c((typeof aCCs[i][3].uid != "undefined" ? $em('A',[aCCs[i][0],(aCCs[i][3].v<8?$e('i',[['class','tribe'+aCCs[i][3].v+'_small']]):"")],[['href','/profile/'+aCCs[i][3].uid[0]]]):"")),
 					$c((typeof aCCs[i][3].aid != "undefined" ? ($a(aCCs[i][3].aid[1],[['href','/alliance/'+aCCs[i][3].aid[0]]])):"")),
