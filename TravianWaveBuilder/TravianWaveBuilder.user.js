@@ -345,8 +345,10 @@ for( var i=1; i<11; i++ ) {
 $am(hrow,[$c(trImg('unit uhero')),$c(langStrings[6])]);
 tbl.appendChild($ee('THEAD',hrow));
 
-var sendBtn = $g('ok').cloneNode(true);
-sendBtn.removeAttribute('name');
+scheduleBtn.value = 'Send later';
+scheduleBtn.addEventListener('click', function() {
+  if (typeof scheduleWave === 'function') scheduleWave();
+}, false);
 sendBtn.removeAttribute('id');
 sendBtn.addEventListener('click',sendWaves,false);
 
