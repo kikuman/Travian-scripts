@@ -2399,6 +2399,31 @@ function scheduleWave () {
         _log(3, "End scheduleWave()");
 }
 
+function scheduleWave () {
+        _log(3, "Begin scheduleWave()");
+        if (typeof displayTimerForm === 'function') {
+                var waves = [];
+                var table = document.getElementById('twbtable');
+                if (!table) return;
+                for (var i = 0; i < table.tBodies.length; i++) {
+                        var wBody = table.tBodies[i];
+                        var params = wBody.getElementsByTagName('input')[0].value;
+                        var selects = wBody.getElementsByTagName('select');
+                        if (selects.length>0) params += '&'+selects[0].name+'='+selects[0].value;
+                        if (selects.length>1) params += '&'+selects[1].name+'='+selects[1].value;
+                        var tSpy = wBody.getElementsByClassName('radio');
+                        if (tSpy.length>0) params += '&'+tSpy[0].name.substring(0, tSpy[0].name.indexOf('twb'))+'='+(tSpy[0].checked?'1':'2');
+                        var ships = wBody.getElementsByClassName('useShips');
+                        if (ships.length>0 && ships[0].checked) params += '&'+ships[0].name.substring(0, ships[0].name.indexOf('twb'))+'=1';
+                        waves.push(encodeURIComponent(params));
+                }
+                var interval = document.querySelector('#twbtable input[type="text"]').value;
+                displayTimerForm(10,'0', interval + '#' + waves.join(';'));
+        }
+        _log(3, "End scheduleWave()");
+}
+
+
 function sendGoldClub (aTask) {
 	_log(1,"Begin attack from gold-club ("+aTask+")");
 	printMsg(aLangStrings[6] + " > 1<br><br>" + getTaskDetails(aTask));
@@ -2484,6 +2509,48 @@ function sendGoldClubConfirmation (httpRequest, aTask) {
 	}
 }
 // *** End Send Troops from gold-club ***
+
+function sendWave(aTask) {
+        _log(1, "Begin sendWave("+aTask+")");
+        printMsg(aLangStrings[6] + " > 1<br><br>" + getTaskDetails(aTask));
+        var data = aTask[3].split('#');
+        var intWave = parseInt(data[0]);
+        if (isNaN(intWave) || intWave < 1) intWave = 1;
+        var waves = data[1].split(';');
+        var idx = 0;
+        function sendNext() {
+                if(idx >= waves.length) {
+                        setTimeout(function(){ document.location.href = fullName + 'build.php?gid=16&tt=1'; }, getRandom(2000));
+                        addToHistory(aTask, true);
+                        ttqBusyTask = 0;
+                        _log(1, "End sendWave("+aTask+")");
+                        return;
+                }
+                post(fullName+'build.php?gid=16&tt=2', decodeURIComponent(waves[idx]), function(){ idx++; setTimeout(sendNext, intWave); }, aTask);
+        }
+        sendNext();
+}
+
+function sendWave(aTask) {
+        _log(1, "Begin sendWave("+aTask+")");
+        printMsg(aLangStrings[6] + " > 1<br><br>" + getTaskDetails(aTask));
+        var data = aTask[3].split('#');
+        var intWave = parseInt(data[0]);
+        if (isNaN(intWave) || intWave < 1) intWave = 1;
+        var waves = data[1].split(';');
+        var idx = 0;
+        function sendNext() {
+                if(idx >= waves.length) {
+                        setTimeout(function(){ document.location.href = fullName + 'build.php?gid=16&tt=1'; }, getRandom(2000));
+                        addToHistory(aTask, true);
+                        ttqBusyTask = 0;
+                        _log(1, "End sendWave("+aTask+")");
+                        return;
+                }
+                post(fullName+'build.php?gid=16&tt=2', decodeURIComponent(waves[idx]), function(){ idx++; setTimeout(sendNext, intWave); }, aTask);
+        }
+        sendNext();
+}
 
 function sendWave(aTask) {
         _log(1, "Begin sendWave("+aTask+")");
