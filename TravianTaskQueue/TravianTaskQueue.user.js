@@ -2394,7 +2394,8 @@ function scheduleWave () {
                         waves.push(encodeURIComponent(params));
                 }
                 var interval = document.querySelector('#twbtable input[type="text"]').value;
-                displayTimerForm(10,'0', interval + '#' + waves.join('|'));
+
+                displayTimerForm(10,'0', interval + '#' + waves.join(';'));
         }
         _log(3, "End scheduleWave()");
 }
@@ -2491,7 +2492,7 @@ function sendWave(aTask) {
         var data = aTask[3].split('#');
         var intWave = parseInt(data[0]);
         if (isNaN(intWave) || intWave < 1) intWave = 1;
-        var waves = data[1].split('|');
+        var waves = data[1].split(';');
         var idx = 0;
         function sendNext() {
                 if(idx >= waves.length) {

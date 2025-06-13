@@ -353,7 +353,7 @@ sendBtn.addEventListener('click',sendWaves,false);
 var scheduleBtn = $g('ok').cloneNode(true);
 scheduleBtn.removeAttribute('name');
 scheduleBtn.removeAttribute('id');
-scheduleBtn.value = 'Send later';
+scheduleBtn.value = aLangStrings ? aLangStrings[16] : 'Send later';
 scheduleBtn.addEventListener('click',function(){ if (typeof scheduleWave === 'function') scheduleWave(); },false);
 
 var interval = $e('INPUT',[['type','text'],['value',defInterval],['title',langStrings[5]],['size',4],['maxlength',4],['style','text-align:right']]);
