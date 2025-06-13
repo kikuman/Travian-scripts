@@ -353,15 +353,23 @@ sendBtn.addEventListener('click',sendWaves,false);
 var scheduleBtn = $g('ok').cloneNode(true);
 scheduleBtn.removeAttribute('name');
 scheduleBtn.removeAttribute('id');
+scheduleBtn.value = (typeof aLangStrings != 'undefined' && aLangStrings) ? aLangStrings[16] : 'Send later';
+scheduleBtn.addEventListener('click',function(){ if (typeof scheduleWave === 'function') scheduleWave(); },false);
+
+var scheduleBtn = $g('ok').cloneNode(true);
+scheduleBtn.removeAttribute('name');
+scheduleBtn.removeAttribute('id');
 scheduleBtn.value = aLangStrings ? aLangStrings[16] : 'Send later';
 scheduleBtn.addEventListener('click',function(){ if (typeof scheduleWave === 'function') scheduleWave(); },false);
 
 var interval = $e('INPUT',[['type','text'],['value',defInterval],['title',langStrings[5]],['size',4],['maxlength',4],['style','text-align:right']]);
 var intervaltxt = $ee('SPAN',langStrings[7],[['style','display:inline-block;padding:0 5px;']]);
 var unitTimetxt = $ee('SPAN',langStrings[8],[['style','display:inline-block;padding:0 5px;']]);
+
 tbl.appendChild($ee('TFOOT',$ee('TR',$em('TD',[intervaltxt,interval,unitTimetxt,sendBtn,scheduleBtn,
         $a(' (v'+version+') ',[['href',scriptURL],['target','_blank']])],
         [['colspan',13],['style','background-color: transparent;text-align:center !important;padding:3px;']]))));
+
 
 build.appendChild(tbl);
 

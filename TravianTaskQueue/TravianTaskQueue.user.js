@@ -1128,6 +1128,7 @@ function refreshTaskList(aTasks) {
 				sTaskSubject = ">> " + aThisTask[2];
 				sTaskMoreInfo = getTroopsInfo(aThisTask[3].split("_"));
 				break;
+
                 case "9": // Send troops through Gold-Club
                         sTask = getOption('FARMLIST','');
                         sTaskSubject = " >> " + aThisTask[2] + " ";
@@ -1139,6 +1140,7 @@ function refreshTaskList(aTasks) {
                         break;
                 default:
                         break;
+
 		}
 
 		oTaskRow.innerHTML = "<span class='ttq_time_village_wrapper' >" +sTime + "</span><span style='float:"+docDir[0]+"'>&nbsp;&mdash;&nbsp;</span>"+ getVillageName(aThisTask[5])+" : <span title='" +sTaskMoreInfo+ "' style='cursor:help;' >" +sTask+ " " +sTaskSubject+ " </span></span>";
@@ -1280,6 +1282,7 @@ function triggerTask(aTask) {
 		case "8": //send Back/Withdraw
 			sendbackwithdraw(aTask);
 			break;
+
                 case "9": //send troops through Gold-Club
                         sendGoldClub(aTask);
                         break;
@@ -1289,6 +1292,7 @@ function triggerTask(aTask) {
                 default: //do nothing
                         _log(1, "Can't trigger an unknown task.");
                         break;
+
 	}
 	_log(3, "End triggerTask("+aTask+")");
 }
@@ -1960,6 +1964,7 @@ function createAttackLinks() {
 				+ '<input type="text" inputmode="numeric" class="text" name="troop[t11]" value="" />'
 				+ '&nbsp;/&nbsp;<a href="#" onclick="jQuery(\'table#troops\').find(\'input[name=\\\'troop[t11]\\\']\').val(1); return false">1 ('+aLangStrings[33]+')</a>';
 		}
+
                 var SndLtrBtn = generateButton(aLangStrings[16], scheduleAttack);
                 var WaveBtn = generateButton('Send waves later', scheduleWave);
                 var oOkBtn = $id('ok');
@@ -1967,6 +1972,7 @@ function createAttackLinks() {
                         oOkBtn.after(SndLtrBtn);
                         oOkBtn.after(WaveBtn);
                 } else { _log(3, "No Send button found."); }
+
 	}
 	_log(3, "End createAttackLinks()");
 }
@@ -2372,6 +2378,7 @@ function scheduleSendClubAll () {
 		listIDs += listNameClass[i].getAttribute('data-list') + ";";
 	}
 	displayTimerForm(9,listName,listIDs);
+
         _log(3, "End scheduleSendClubAll()");
 }
 
@@ -2394,11 +2401,11 @@ function scheduleWave () {
                         waves.push(encodeURIComponent(params));
                 }
                 var interval = document.querySelector('#twbtable input[type="text"]').value;
-
                 displayTimerForm(10,'0', interval + '#' + waves.join(';'));
         }
         _log(3, "End scheduleWave()");
 }
+
 
 function sendGoldClub (aTask) {
 	_log(1,"Begin attack from gold-club ("+aTask+")");
@@ -2485,6 +2492,27 @@ function sendGoldClubConfirmation (httpRequest, aTask) {
 	}
 }
 // *** End Send Troops from gold-club ***
+
+function sendWave(aTask) {
+        _log(1, "Begin sendWave("+aTask+")");
+        printMsg(aLangStrings[6] + " > 1<br><br>" + getTaskDetails(aTask));
+        var data = aTask[3].split('#');
+        var intWave = parseInt(data[0]);
+        if (isNaN(intWave) || intWave < 1) intWave = 1;
+        var waves = data[1].split(';');
+        var idx = 0;
+        function sendNext() {
+                if(idx >= waves.length) {
+                        setTimeout(function(){ document.location.href = fullName + 'build.php?gid=16&tt=1'; }, getRandom(2000));
+                        addToHistory(aTask, true);
+                        ttqBusyTask = 0;
+                        _log(1, "End sendWave("+aTask+")");
+                        return;
+                }
+                post(fullName+'build.php?gid=16&tt=2', decodeURIComponent(waves[idx]), function(){ idx++; setTimeout(sendNext, intWave); }, aTask);
+        }
+        sendNext();
+}
 
 function sendWave(aTask) {
         _log(1, "Begin sendWave("+aTask+")");
@@ -3123,6 +3151,7 @@ function handleMerchantRequestConfirmation(httpRequest, options) {
 
 //  *** BEGIN Timer Form Code ***
 /**************************************************************************
+
  * @param iTask: 0 - build, 1 - upgrade, 2 - attack,raid,support, 3 - research, 4 - train troops, 6 - demolish, 7 - Send Merchants, 8 - Send Troops Back, 10 - Send Wave
  * @param target: sitedId for iTask = 0 or 1; iVillageId for siteId = 2
  * @param options: buildingId for iTask = 0; troops for attacks.
@@ -3204,6 +3233,7 @@ function displayTimerForm(iTask, target, options, timestamp, taskindex, villaged
 			sWhat = " >> " + target;
 			sMoreInfo = getTroopsInfo(options);
 			break;
+
                 case 9: // Send troops through Gold-Club
                         var sTask = getOption('FARMLIST','');
                         if( sTask == '' ) {
@@ -3211,12 +3241,14 @@ function displayTimerForm(iTask, target, options, timestamp, taskindex, villaged
                                 setOption('FARMLIST',sTask);
                         }
                         sWhat = " >> " + target;
+
 			var tA = $gc('iReport1');
 			//if( tA.length > 0 ) {
 			//	tA = tA[0].getAttribute('alt');
 			//	sWhat += ' >> <img class="iReport iReport1" src="img/x.gif" title="' + tA +
 			//	'" alt="' + tA + '"><input type="checkbox" "checked">';
 			//}
+
                         /* добавлять код надо ниже, там, где каты. Это будут 6й,7й,8й элемент. Обязательно дать name для 6го.
                          * затем в функции ниже парсить. Перевод надо добавить. Лучше не ловить с сервера.
                          */
@@ -3226,6 +3258,7 @@ function displayTimerForm(iTask, target, options, timestamp, taskindex, villaged
                         sWhat = aLangTasks[9];
                         sMoreInfo = '';
                         break;
+
 	}
 
 	var oTimerForm = document.createElement("form");
@@ -3490,6 +3523,7 @@ function setTask(iTask, iWhen, target, options, taskindex, villagedid, refreshTa
 			var opts = options.split("_");
 			sTaskSubject = " >> " + target + "<br>" + getTroopsInfo(opts) ;
 			break;
+
                 case "9": // Send troops through Gold-Club
                         sTask = getOption('FARMLIST','');
                         var opts = options.split("_");
@@ -3501,6 +3535,7 @@ function setTask(iTask, iWhen, target, options, taskindex, villagedid, refreshTa
                         break;
                 default:
                         break;
+
 	}
 
 	printMsg(getVillageName(iVillageId,true) + '<br/>' + aLangStrings[10] + '<br/>' +sTask+ ' ' +sTaskSubject);
