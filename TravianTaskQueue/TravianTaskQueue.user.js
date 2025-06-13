@@ -434,7 +434,7 @@ if (init) {
 
 	// Default is English. This is also the array that will be used to replace the zeros (missing words) in the below translations. The Buildings are only used for catapult targeting for now. I hope to get rid of it entirely.
 	var nLangBuildings = ["", "Woodcutter", "Clay Pit", "Iron Mine", "Cropland", "Sawmill", "Brickyard", "Iron Foundry", "Grain Mill", "Bakery", "Warehouse", "Granary", "<No Building>", "Smithy", "Tournament Square", "Main Building", "Rally Point", "Marketplace", "Embassy", "Barracks", "Stable", "Workshop", "Academy", "Cranny", "Town Hall", "Residence", "Palace", "Treasury", "Trade Office", "Great Barracks", "Great Stable", "City Wall", "Earth Wall", "Palisade", "Stonemason's Lodge", "Brewery", "Trapper", "Hero's Mansion", "Great Warehouse", "Great Granary", "Wonder Of The World", "Horse Drinking Trough", "Stone Wall", "Makeshift Wall", "Command Center", "Waterworks", "Hospital"];
-	var nLangTasks = ["Build", "Upgrade", "Attack", "Research", "Train", "Party", "Demolish", "Send Merchants", "Send Back/Withdraw"];
+var nLangTasks = ["Build", "Upgrade", "Attack", "Research", "Train", "Party", "Demolish", "Send Merchants", "Send Back/Withdraw", "Send Wave"];
 	var nLangStrings = ["Build later", "Upgrade later", "Unknown Town", "Research later", "Schedule this Task for Later", "We started building ", "<center>HALT!</center><br>Please wait, TTQ is processing this task!<br>Step", "Traps", " build request sent. However, it appears that the building is not building.", "was attempted but the server redirected us.", "The task was scheduled.", "Redirected", "We can't schedule this task right now.", "Error", "Scheduled Tasks", "Delete", "Send later", "No troops were selected.", "Your troops were sent to", "Your troops could not be sent to", "Reinforcement", "Attack", "Raid", "Catapults will aim at", "random", "at", "or after", "seconds", "minutes", "hours", "days", "Spy for resources and troops", "Spy for troops and defenses", "away", "The attack cannot be scheduled because no destination was specified.", "at site no.", "Sort by:", "type ", "time ", "target ", "options ", "village ", "Task History", "Flush History", "We started researching ", " cannot be researched.", "Page Failed", "Spy", "train later", "troops.", "... May have not happened!", "We started training ", " cannot be trained.", "Party Later", " but not today.", "We started to ", "Close", "Add/Edit Task Schedule", "Edit and Close", "Add and Close", "Add", "Are you sure you want to [s1] [s2]?", "Demolish Later", "Demolishing", "Cannot demolish", "Invalid coordinates or no resources selected.", "Using Local Time", "Using Server Time", " was attempted but we could not find the link.", " was attempted but failed. Reason: ", "No Link", " was attempted but the building was not found.", "No Building", " was attempted but the server returned an error.", "Server:", "Confirmation Failed", "Sorry, I <b>may</b> have built the building in the wrong town.", "Misbuild:", "Sent Back/Withdrew troops.<br>Troops are going home to:", "Sent Back/Withdrew troops Failed (I think).<br>Troops were supposed to go home to: ", "Click to make this your Active Village." , "Click to see this Village Details screen.", "Timeout or TTQ Crash"];
 	var nLangMenuOptions = ["TTQ: ", "Use server time", "Use local time", "Set your tribe", "Task History", "Reset", "\nHow many past tasks do we keep in history?\n(Type 0 to disable task history.) \nCurrently: ", " What is your tribe on this server?\nType 0 for Romans, 1 for Teutons, 2 for Gauls, 5 for Egyptians, 6 for Huns, 7 for Spartans, 8 for Vikings. Or a negative number to enable autodetect (ie: -1)\nCurrently: ", "Are you sure you want to reset all TTQ variables?", "Debug", "Enable debug log on screen. Debug level values:\n0 - quiet, 1 - nearly quite, 2 - verbose, 3 - detailed"];
 	// The english troop names are not really needed. But they are provided here in the situation that the the troop name autodetect (rip) does not work. (ie. no rally point)
@@ -1128,12 +1128,17 @@ function refreshTaskList(aTasks) {
 				sTaskSubject = ">> " + aThisTask[2];
 				sTaskMoreInfo = getTroopsInfo(aThisTask[3].split("_"));
 				break;
-			case "9": // Send troops through Gold-Club
-				sTask = getOption('FARMLIST','');
-				sTaskSubject = " >> " + aThisTask[2] + " ";
-				break;
-			default:
-				break;
+                case "9": // Send troops through Gold-Club
+                        sTask = getOption('FARMLIST','');
+                        sTaskSubject = " >> " + aThisTask[2] + " ";
+                        break;
+                case "10": // Send Wave
+                        sTask = aLangTasks[9];
+                        sTaskSubject = '';
+                        sTaskMoreInfo = '';
+                        break;
+                default:
+                        break;
 		}
 
 		oTaskRow.innerHTML = "<span class='ttq_time_village_wrapper' >" +sTime + "</span><span style='float:"+docDir[0]+"'>&nbsp;&mdash;&nbsp;</span>"+ getVillageName(aThisTask[5])+" : <span title='" +sTaskMoreInfo+ "' style='cursor:help;' >" +sTask+ " " +sTaskSubject+ " </span></span>";
@@ -1275,12 +1280,15 @@ function triggerTask(aTask) {
 		case "8": //send Back/Withdraw
 			sendbackwithdraw(aTask);
 			break;
-		case "9": //send troops through Gold-Club
-			sendGoldClub(aTask);
-			break;
-		default: //do nothing
-			_log(1, "Can't trigger an unknown task.");
-			break;
+                case "9": //send troops through Gold-Club
+                        sendGoldClub(aTask);
+                        break;
+                case "10": //send wave
+                        sendWave(aTask);
+                        break;
+                default: //do nothing
+                        _log(1, "Can't trigger an unknown task.");
+                        break;
 	}
 	_log(3, "End triggerTask("+aTask+")");
 }
@@ -1952,9 +1960,13 @@ function createAttackLinks() {
 				+ '<input type="text" inputmode="numeric" class="text" name="troop[t11]" value="" />'
 				+ '&nbsp;/&nbsp;<a href="#" onclick="jQuery(\'table#troops\').find(\'input[name=\\\'troop[t11]\\\']\').val(1); return false">1 ('+aLangStrings[33]+')</a>';
 		}
-		var SndLtrBtn = generateButton(aLangStrings[16], scheduleAttack);
-		var oOkBtn = $id('ok');
-		if (oOkBtn) { oOkBtn.after(SndLtrBtn); } else { _log(3, "No Send button found."); }
+                var SndLtrBtn = generateButton(aLangStrings[16], scheduleAttack);
+                var WaveBtn = generateButton('Send waves later', scheduleWave);
+                var oOkBtn = $id('ok');
+                if (oOkBtn) {
+                        oOkBtn.after(SndLtrBtn);
+                        oOkBtn.after(WaveBtn);
+                } else { _log(3, "No Send button found."); }
 	}
 	_log(3, "End createAttackLinks()");
 }
@@ -2360,7 +2372,31 @@ function scheduleSendClubAll () {
 		listIDs += listNameClass[i].getAttribute('data-list') + ";";
 	}
 	displayTimerForm(9,listName,listIDs);
-	_log(3, "End scheduleSendClubAll()");
+        _log(3, "End scheduleSendClubAll()");
+}
+
+function scheduleWave () {
+        _log(3, "Begin scheduleWave()");
+        if (typeof displayTimerForm === 'function') {
+                var waves = [];
+                var table = document.getElementById('twbtable');
+                if (!table) return;
+                for (var i = 0; i < table.tBodies.length; i++) {
+                        var wBody = table.tBodies[i];
+                        var params = wBody.getElementsByTagName('input')[0].value;
+                        var selects = wBody.getElementsByTagName('select');
+                        if (selects.length>0) params += '&'+selects[0].name+'='+selects[0].value;
+                        if (selects.length>1) params += '&'+selects[1].name+'='+selects[1].value;
+                        var tSpy = wBody.getElementsByClassName('radio');
+                        if (tSpy.length>0) params += '&'+tSpy[0].name.substring(0, tSpy[0].name.indexOf('twb'))+'='+(tSpy[0].checked?'1':'2');
+                        var ships = wBody.getElementsByClassName('useShips');
+                        if (ships.length>0 && ships[0].checked) params += '&'+ships[0].name.substring(0, ships[0].name.indexOf('twb'))+'=1';
+                        waves.push(encodeURIComponent(params));
+                }
+                var interval = document.querySelector('#twbtable input[type="text"]').value;
+                displayTimerForm(10,'0', interval + '#' + waves.join('|'));
+        }
+        _log(3, "End scheduleWave()");
 }
 
 function sendGoldClub (aTask) {
@@ -2448,6 +2484,27 @@ function sendGoldClubConfirmation (httpRequest, aTask) {
 	}
 }
 // *** End Send Troops from gold-club ***
+
+function sendWave(aTask) {
+        _log(1, "Begin sendWave("+aTask+")");
+        printMsg(aLangStrings[6] + " > 1<br><br>" + getTaskDetails(aTask));
+        var data = aTask[3].split('#');
+        var intWave = parseInt(data[0]);
+        if (isNaN(intWave) || intWave < 1) intWave = 1;
+        var waves = data[1].split('|');
+        var idx = 0;
+        function sendNext() {
+                if(idx >= waves.length) {
+                        setTimeout(function(){ document.location.href = fullName + 'build.php?gid=16&tt=1'; }, getRandom(2000));
+                        addToHistory(aTask, true);
+                        ttqBusyTask = 0;
+                        _log(1, "End sendWave("+aTask+")");
+                        return;
+                }
+                post(fullName+'build.php?gid=16&tt=2', decodeURIComponent(waves[idx]), function(){ idx++; setTimeout(sendNext, intWave); }, aTask);
+        }
+        sendNext();
+}
 
 // *** Begin Troop/Trap Training Functions ***
 function createTrainLinks(buildingID) {
@@ -3065,7 +3122,7 @@ function handleMerchantRequestConfirmation(httpRequest, options) {
 
 //  *** BEGIN Timer Form Code ***
 /**************************************************************************
- * @param iTask: 0 - build, 1 - upgrade, 2 - attack,raid,support, 3 - research, 4 - train troops, 6 - demolish, 7 - Send Merchants, 8 - Send Troops Back
+ * @param iTask: 0 - build, 1 - upgrade, 2 - attack,raid,support, 3 - research, 4 - train troops, 6 - demolish, 7 - Send Merchants, 8 - Send Troops Back, 10 - Send Wave
  * @param target: sitedId for iTask = 0 or 1; iVillageId for siteId = 2
  * @param options: buildingId for iTask = 0; troops for attacks.
  * @param timestamp: if it is passed, suggest the time calculated from this (Caution! It is in seconds).
@@ -3146,23 +3203,28 @@ function displayTimerForm(iTask, target, options, timestamp, taskindex, villaged
 			sWhat = " >> " + target;
 			sMoreInfo = getTroopsInfo(options);
 			break;
-		case 9: // Send troops through Gold-Club
-			var sTask = getOption('FARMLIST','');
-			if( sTask == '' ) {
-				sTask = $gc('tabItem',$gc('favorKey99')[0])[0].textContent;
-				setOption('FARMLIST',sTask);
-			}
-			sWhat = " >> " + target;
+                case 9: // Send troops through Gold-Club
+                        var sTask = getOption('FARMLIST','');
+                        if( sTask == '' ) {
+                                sTask = $gc('tabItem',$gc('favorKey99')[0])[0].textContent;
+                                setOption('FARMLIST',sTask);
+                        }
+                        sWhat = " >> " + target;
 			var tA = $gc('iReport1');
 			//if( tA.length > 0 ) {
 			//	tA = tA[0].getAttribute('alt');
 			//	sWhat += ' >> <img class="iReport iReport1" src="img/x.gif" title="' + tA +
 			//	'" alt="' + tA + '"><input type="checkbox" "checked">';
 			//}
-			/* добавлять код надо ниже, там, где каты. Это будут 6й,7й,8й элемент. Обязательно дать name для 6го.
-			 * затем в функции ниже парсить. Перевод надо добавить. Лучше не ловить с сервера.
-			 */
-			break;
+                        /* добавлять код надо ниже, там, где каты. Это будут 6й,7й,8й элемент. Обязательно дать name для 6го.
+                         * затем в функции ниже парсить. Перевод надо добавить. Лучше не ловить с сервера.
+                         */
+                        break;
+                case 10: // Send Wave
+                        sTask = aLangTasks[9];
+                        sWhat = aLangTasks[9];
+                        sMoreInfo = '';
+                        break;
 	}
 
 	var oTimerForm = document.createElement("form");
@@ -3427,13 +3489,17 @@ function setTask(iTask, iWhen, target, options, taskindex, villagedid, refreshTa
 			var opts = options.split("_");
 			sTaskSubject = " >> " + target + "<br>" + getTroopsInfo(opts) ;
 			break;
-		case "9": // Send troops through Gold-Club
-			sTask = getOption('FARMLIST','');
-			var opts = options.split("_");
-			sTaskSubject = " >> " + target + " ";
-			break;
-		default:
-			break;
+                case "9": // Send troops through Gold-Club
+                        sTask = getOption('FARMLIST','');
+                        var opts = options.split("_");
+                        sTaskSubject = " >> " + target + " ";
+                        break;
+                case "10": // Send Wave
+                        sTask = aLangTasks[9];
+                        sTaskSubject = '';
+                        break;
+                default:
+                        break;
 	}
 
 	printMsg(getVillageName(iVillageId,true) + '<br/>' + aLangStrings[10] + '<br/>' +sTask+ ' ' +sTaskSubject);
