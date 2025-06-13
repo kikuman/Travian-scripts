@@ -2394,6 +2394,7 @@ function scheduleWave () {
                         waves.push(encodeURIComponent(params));
                 }
                 var interval = document.querySelector('#twbtable input[type="text"]').value;
+
                 displayTimerForm(10,'0', interval + '#' + waves.join(';'));
         }
         _log(3, "End scheduleWave()");
