@@ -3591,7 +3591,7 @@ function marketSend () {
                 var ratio = totalWanted > maxRTr ? totalWanted / maxRTr : 1;
                 for( var i = 0; i < 4; i++ ) { updateInput(rxI[i],0); }
                 for( var i = 0; i < 4; i++ ) {
-                        var wantRes = Math.ceil(wants[i] / ratio);
+                        var wantRes = Math.floor(wants[i] / ratio);
                         if( wantRes < 0 ) wantRes = 0;
                         if( checkRes[i].checked ) updateInput(rxI[i],wantRes < resNow[i] ? wantRes: resNow[i]);
                 }
