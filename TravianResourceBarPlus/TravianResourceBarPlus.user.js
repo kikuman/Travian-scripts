@@ -7705,6 +7705,7 @@ function cropFind () {
                if (neFL) {
                         var xpH   = $a(trImg('iExperience'),[['href',jsVoid]]);
                         var rdH   = $a($em('div',[$e('i',[['class','resources_small']]),"/",trImg('def1')]),[['href',jsVoid]]);
+                        var rddH  = $a($em('div',[$e('i',[['class','resources_small']]),"/",'<->']),[['href',jsVoid]]);
                         var distH = $a('<->',[['href',jsVoid]]);
 
 
@@ -7715,6 +7716,7 @@ function cropFind () {
                                 $c(''),
                                 $c(xpH,[['class','body']]),
                                 $c(rdH,[['style','width:52px']]),
+                                $c(rddH,[['style','width:52px']]),
                                 $c(''),
                                 $c(''),
 
@@ -7755,7 +7757,8 @@ function cropFind () {
                if(neFL){
                        xpH.addEventListener('click',function(){sortNeighbors(3,true);},false);
                        rdH.addEventListener('click',function(){sortNeighbors(4,true);},false);
-                       distH.addEventListener('click',function(){sortNeighbors(7);},false);
+                       rddH.addEventListener('click',function(){sortNeighbors(5,true);},false);
+                       distH.addEventListener('click',function(){sortNeighbors(8);},false);
                } else {
                        distH.addEventListener('click',function(){sortNeighbors(3);},false);
                }
@@ -7766,14 +7769,14 @@ function cropFind () {
 
 
 
-				tBody.appendChild($em('TR',[
-					$c((typeof aCCs[i][3].uid != "undefined" ? $em('A',[aCCs[i][0],(aCCs[i][3].v<8?$e('i',[['class','tribe'+aCCs[i][3].v+'_small']]):"")],[['href','/profile/'+aCCs[i][3].uid[0]]]):"")),
-					$c((typeof aCCs[i][3].aid != "undefined" ? ($a(aCCs[i][3].aid[1],[['href','/alliance/'+aCCs[i][3].aid[0]]])):"")),
-					$c(aCCs[i][3].e),$c(''),$c(''),
-					$c($a(aCCs[i][1]+'|'+aCCs[i][2],[['href',('position_details.php?x='+aCCs[i][1]+'&y='+aCCs[i][2])]])),
-					$c($a('&#10140;',[['onclick',("Travian.WindowManager.closeAllWindows(); window.Travian.React.FarmList.openSlotDialog(window.Travian.React.FarmList.SLOT_DIALOG_TYPE_CREATE, { coordinates: {x: "+aCCs[i][1]+", y: "+aCCs[i][2]+"},});")]])),
-					$c(calcDistance(xy2id(aCCs[i][1],aCCs[i][2]), cell_id).toFixed(1))
-				]));
+                                tBody.appendChild($em('TR',[
+                                        $c((typeof aCCs[i][3].uid != "undefined" ? $em('A',[aCCs[i][0],(aCCs[i][3].v<8?$e('i',[['class','tribe'+aCCs[i][3].v+'_small']]):"")],[['href','/profile/'+aCCs[i][3].uid[0]]]):"")),
+                                        $c((typeof aCCs[i][3].aid != "undefined" ? ($a(aCCs[i][3].aid[1],[['href','/alliance/'+aCCs[i][3].aid[0]]])):"")),
+                                        $c(aCCs[i][3].e),$c(''),$c(''),$c(''),
+                                        $c($a(aCCs[i][1]+'|'+aCCs[i][2],[['href',('position_details.php?x='+aCCs[i][1]+'&y='+aCCs[i][2])]])),
+                                        $c($a('&#10140;',[['onclick',("Travian.WindowManager.closeAllWindows(); window.Travian.React.FarmList.openSlotDialog(window.Travian.React.FarmList.SLOT_DIALOG_TYPE_CREATE, { coordinates: {x: "+aCCs[i][1]+", y: "+aCCs[i][2]+"},});")]])),
+                                        $c(calcDistance(xy2id(aCCs[i][1],aCCs[i][2]), cell_id).toFixed(1))
+                                ]));
 				if( aCCs[i][3].e.indexOf('oasis') != -1 && typeof aCCs[i][3].uid == "undefined" ) {
 					var newDiv = document.createElement("div");
 					newDiv.innerHTML = aCCs[i][4];
@@ -7785,9 +7788,12 @@ function cropFind () {
 						var td = parseInt(chkOasisFL[vid].rows[0].cells[1].innerText.replace(",","")) + parseInt(chkOasisFL[vid].rows[0].cells[2].innerText.replace(",",""));
 						var heroxp = parseInt(chkOasisFL[vid].rows[0].cells[4].innerText.replace(",",""));
 						var res = heroxp*160; //160 resources per 1 animal crop consumption, or per 1 hero xp point
-						var ratio = ((res/td)).toFixed(2);
-						tBody.rows[i].cells[3].appendChild($em('div',[$em('div',[heroxp],[['class','body']])],[['id','reportWrapper'],['style','font-weight:bold;']]));
-						tBody.rows[i].cells[4].appendChild($em('div',[$em('div',[ratio],[['class','body']])],[['id','reportWrapper'],['style','font-weight:bold;']]));
+                                                var ratio = ((res/td)).toFixed(2);
+                                                var dist  = parseFloat(tBody.rows[i].cells[8].textContent);
+                                                var rdRatio = dist>0?((res/dist).toFixed(2)):'0';
+                                                tBody.rows[i].cells[3].appendChild($em('div',[$em('div',[heroxp],[['class','body']])],[['id','reportWrapper'],['style','font-weight:bold;']]));
+                                                tBody.rows[i].cells[4].appendChild($em('div',[$em('div',[ratio],[['class','body']])],[['id','reportWrapper'],['style','font-weight:bold;']]));
+                                                tBody.rows[i].cells[5].appendChild($em('div',[$em('div',[rdRatio],[['class','body']])],[['id','reportWrapper'],['style','font-weight:bold;']]));
 						tBody.rows[i].cells[2].appendChild($em('div'));
 						var animL = [0,0,0,0,0,0,0,1,1,1];
 						for( var z=0; z<animX.snapshotLength; z++ ) {
@@ -7812,7 +7818,7 @@ function cropFind () {
 					$c(calcDistance(xy2id(aCCs[i][1],aCCs[i][2]), cell_id).toFixed(1))]));
                         }
                 }
-                lastSC = neFL ? 7 : 3;
+                lastSC = neFL ? 8 : 3;
                 lastSD = 0;
                 cont.appendChild($ee('P',newT,[['id',allIDs[18]],['style','margin:10px 15px 0px;padding-bottom:15px;']]));
                 addSpeedAndRTSend($g(allIDs[18]));
