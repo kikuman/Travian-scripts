@@ -12,14 +12,14 @@
 // @exclude     *.css
 // @exclude     *.js
 
-// @version        2.25.20
+// @version        2.25.21
 // ==/UserScript==
 
 (function () {
 var RunTime = [Date.now()];
 
 function allInOneOpera () {
-var version = '2.25.20';
+var version = '2.25.21';
 
 notRunYet = false;
 
@@ -3512,7 +3512,7 @@ function marketSend () {
 			if( checkRes[i].checked ) mhRowLinkP ( i );
 	}
 	var extNegat = 0;
-	function mhRowLinkMem (ratio) {
+        function mhRowLinkMem (ratio) {
 		loadVCookie('vPPH', 'village_PPH', RB.wantsMem[4]);
 		if( RB.wantsMem[4] == 0 ) return;
 		var arXY = id2xy( RB.wantsMem[4] );
@@ -3549,10 +3549,55 @@ function marketSend () {
 			if( wantRes < 0 ) wantRes = 0;
 			if( checkRes[i].checked ) updateInput(rxI[i],wantRes < resNow[i] ? wantRes: resNow[i]);
 		}
-		mhRowUpdate();
-		//sendResourses( RB.wantsMem[4] );
-	}
-	var mcFL = true;
+                mhRowUpdate();
+                //sendResourses( RB.wantsMem[4] );
+        }
+
+        function mhRowLinkMemPercent () {
+                loadVCookie('vPPH', 'village_PPH', RB.wantsMem[4]);
+                if( RB.wantsMem[4] == 0 ) return;
+                var arXY = id2xy( RB.wantsMem[4] );
+                var coordX = parseInt($gt('input',$gc('coordinateX',basee)[0])[0].getAttribute("value"));
+                var coordY = parseInt($gt('input',$gc('coordinateY',basee)[0])[0].getAttribute("value"));
+                if (arXY[0] != coordX || arXY[1] != coordY) { sendResourses( RB.wantsMem[4] ); return; }
+                var htR = getTTime( calcDistance(RB.wantsMem[4], village_aid), MTime[parseInt(RB.Setup[2])]*sM, 0, 0 );
+                var ht = parseInt(RB.wantsMem[9]) < htR ? htR - parseInt(RB.wantsMem[9]): 0;
+                var totalWanted = 0;
+                var wants = [];
+                extNegat = 0;
+                for( var i = 0; i < 4; i++ ) {
+                        var wantRes = Math.ceil(parseInt((RB.wantsMem[i]) - RB.village_PPH[i]/3600 * ht));
+                        if( RB.village_PPH[i] < 0 && ht > 0 ) {
+                                var deltaTime = RB.village_PPH[12] > 0 ? Math.round((Date.now())/1000) - parseInt(RB.village_PPH[12]): 0;
+                                var leftResInV = Math.floor(RB.village_PPH[i]/3600 * (deltaTime + ht) + RB.village_PPH[i+4]);
+                                if( leftResInV < 0 ) {
+                                        var nowResInV = Math.floor(RB.village_PPH[i]/3600 * deltaTime + RB.village_PPH[i+4]);
+                                        if( nowResInV < 0 ) nowResInV = 0;
+                                        wantRes = nowResInV + parseInt(RB.wantsMem[i]);
+                                }
+                                var minLeft = prompt(gtext("consnegat"), 10);
+                                if( minLeft == null ) minLeft = 0;
+                                if( minLeft == 0 ) wantRes = RB.wantsMem[i];
+                                else {
+                                        extNegat = Math.ceil(RB.village_PPH[i]/3600 * parseInt(minLeft)*60);
+                                        wantRes -= extNegat;
+                                }
+                        }
+                        if( wantRes < 0 ) wantRes = 0;
+                        wants[i] = wantRes;
+                        if( checkRes[i].checked ) totalWanted += wantRes < resNow[i] ? wantRes : resNow[i];
+                }
+                var maxRTr = getMaxRTr();
+                var ratio = totalWanted > maxRTr ? totalWanted / maxRTr : 1;
+                for( var i = 0; i < 4; i++ ) { updateInput(rxI[i],0); }
+                for( var i = 0; i < 4; i++ ) {
+                        var wantRes = Math.ceil(wants[i] / ratio);
+                        if( wantRes < 0 ) wantRes = 0;
+                        if( checkRes[i].checked ) updateInput(rxI[i],wantRes < resNow[i] ? wantRes: resNow[i]);
+                }
+                mhRowUpdate();
+        }
+        var mcFL = true;
 	function rEL () {
 		$g('button').removeEventListener('DOMNodeInserted',rEL);
 		if( mcFL ) {
@@ -3781,8 +3826,10 @@ function marketSend () {
 	memL.addEventListener('click', function() { mhRowLinkMem(1); }, false);
 	var memL2 = $a('M/2',[['href',jsVoid],['style','font-size:15px;']]);
 	memL2.addEventListener('click', function() { mhRowLinkMem(2); }, false);
-	var memL3 = $a('M/3',[['href',jsVoid],['style','font-size:15px;']]);
-	memL3.addEventListener('click', function() { mhRowLinkMem(3); }, false);
+        var memL3 = $a('M/3',[['href',jsVoid],['style','font-size:15px;']]);
+        memL3.addEventListener('click', function() { mhRowLinkMem(3); }, false);
+        var memLP = $a('M%',[['href',jsVoid],['style','font-size:15px;']]);
+        memLP.addEventListener('click', mhRowLinkMemPercent, false);
 	var refEq = $a('=',[['href',jsVoid],['style','font-size:15px;']]);
 	refEq.addEventListener('click', mhRowsLinkEq, false);
 	var refP = $a('%',[['href',jsVoid],['style','font-size:15px;']]);
@@ -3801,8 +3848,9 @@ function marketSend () {
 	newDiv.appendChild(mButt);
 	newDiv.appendChild(memL);
 	newDiv.appendChild(memL2);
-	newDiv.appendChild(memL3);
-	newDiv.appendChild(refEq);
+        newDiv.appendChild(memL3);
+        newDiv.appendChild(memLP);
+        newDiv.appendChild(refEq);
 	newDiv.appendChild(refP);
 	newDiv.appendChild(refCl);
 	newDiv.appendChild(pButt);
