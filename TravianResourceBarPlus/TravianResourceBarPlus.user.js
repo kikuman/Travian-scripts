@@ -3528,8 +3528,9 @@ function marketSend () {
 		var htR = getTTime( calcDistance(RB.wantsMem[4], village_aid), MTime[parseInt(RB.Setup[2])]*sM, 0, 0 );
 		var ht = parseInt(RB.wantsMem[9]) < htR ? htR - parseInt(RB.wantsMem[9]): 0;
 		for( var i = 0; i < 4; i++ ) { updateInput(rxI[i],0); } //reset values so they will not overflow
-		for( var i = 0; i < 4; i++ ) {
-			var wantRes = Math.ceil(parseInt((RB.wantsMem[i]) - RB.village_PPH[i]/3600 * ht)/ratio);
+                for( var i = 0; i < 4; i++ ) {
+                        var wantRes = Math.ceil(parseInt((RB.wantsMem[i]) - RB.village_PPH[i]/3600 * ht)/ratio);
+                        wantRes = Math.floor(wantRes / 100) * 100;
 			if( RB.village_PPH[i] < 0 && ht > 0 ) {
 				var deltaTime = RB.village_PPH[12] > 0 ? Math.round((Date.now())/1000) - parseInt(RB.village_PPH[12]): 0;
 				var leftResInV = Math.floor(RB.village_PPH[i]/3600 * (deltaTime + ht) + RB.village_PPH[i+4]);
