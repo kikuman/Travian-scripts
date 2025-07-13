@@ -3512,7 +3512,7 @@ function marketSend () {
 			if( checkRes[i].checked ) mhRowLinkP ( i );
 	}
 	var extNegat = 0;
-	function mhRowLinkMem (ratio) {
+        function mhRowLinkMem (ratio) {
 		loadVCookie('vPPH', 'village_PPH', RB.wantsMem[4]);
 		if( RB.wantsMem[4] == 0 ) return;
 		var arXY = id2xy( RB.wantsMem[4] );
@@ -3549,10 +3549,24 @@ function marketSend () {
 			if( wantRes < 0 ) wantRes = 0;
 			if( checkRes[i].checked ) updateInput(rxI[i],wantRes < resNow[i] ? wantRes: resNow[i]);
 		}
-		mhRowUpdate();
-		//sendResourses( RB.wantsMem[4] );
-	}
-	var mcFL = true;
+                mhRowUpdate();
+                //sendResourses( RB.wantsMem[4] );
+        }
+
+        function mhRowLinkMemPercent () {
+                mhRowLinkMem(1);
+                var maxRTr = getMaxRTr();
+                var totTransport = getTotTransport();
+                if (totTransport > maxRTr) {
+                        var ratio = maxRTr / totTransport;
+                        for (var i = 0; i < 4; i++) {
+                                var val = Math.floor(parseInt(rxI[i].value) * ratio);
+                                updateInput(rxI[i], val);
+                        }
+                }
+                mhRowUpdate();
+        }
+        var mcFL = true;
 	function rEL () {
 		$g('button').removeEventListener('DOMNodeInserted',rEL);
 		if( mcFL ) {
@@ -3781,10 +3795,12 @@ function marketSend () {
 	memL.addEventListener('click', function() { mhRowLinkMem(1); }, false);
 	var memL2 = $a('M/2',[['href',jsVoid],['style','font-size:15px;']]);
 	memL2.addEventListener('click', function() { mhRowLinkMem(2); }, false);
-	var memL3 = $a('M/3',[['href',jsVoid],['style','font-size:15px;']]);
-	memL3.addEventListener('click', function() { mhRowLinkMem(3); }, false);
-	var refEq = $a('=',[['href',jsVoid],['style','font-size:15px;']]);
-	refEq.addEventListener('click', mhRowsLinkEq, false);
+        var memL3 = $a('M/3',[['href',jsVoid],['style','font-size:15px;']]);
+        memL3.addEventListener('click', function() { mhRowLinkMem(3); }, false);
+        var memLP = $a('M%',[['href',jsVoid],['style','font-size:15px;']]);
+        memLP.addEventListener('click', mhRowLinkMemPercent, false);
+        var refEq = $a('=',[['href',jsVoid],['style','font-size:15px;']]);
+        refEq.addEventListener('click', mhRowsLinkEq, false);
 	var refP = $a('%',[['href',jsVoid],['style','font-size:15px;']]);
 	refP.addEventListener('click', mhRowsLinkPP, false);
 	var refCl = $a('C',[['href',jsVoid],['style','font-size:15px;']]);
@@ -3801,8 +3817,9 @@ function marketSend () {
 	newDiv.appendChild(mButt);
 	newDiv.appendChild(memL);
 	newDiv.appendChild(memL2);
-	newDiv.appendChild(memL3);
-	newDiv.appendChild(refEq);
+        newDiv.appendChild(memL3);
+        newDiv.appendChild(memLP);
+        newDiv.appendChild(refEq);
 	newDiv.appendChild(refP);
 	newDiv.appendChild(refCl);
 	newDiv.appendChild(pButt);
