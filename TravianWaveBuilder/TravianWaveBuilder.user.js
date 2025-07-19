@@ -271,7 +271,7 @@ function moveWaveDown () {
     }
 }
 
-function sendTroops (x) {
+function sendTroops (x, cb) {
 	var wBody = tbl.tBodies[x];
 	var sParams = $gt('INPUT',wBody)[0].value;
 	var	tInputs = $gt('SELECT',wBody);
@@ -290,21 +290,29 @@ function sendTroops (x) {
 	if( x == wCount-1 ) {
 		setTimeout(function(){ document.location.href = fullName +'build.php?gid=16&tt=1'; }, getRandom(2000));
 	}
-	ajaxRequest(fullName + a2bURL, "POST", sParams, function() { return function(x) { return logWaves(x,1); }(x+1); }, 
-		function() { return function(x) { return logWaves(x,0); }(x+1); } );
+        ajaxRequest(fullName + a2bURL, "POST", sParams, function() {
+                logWaves(x+1,1);
+                if (cb) cb();
+        },
+        function() {
+                logWaves(x+1,0);
+                if (cb) cb();
+        } );
 }
 
 function sendWaves () {
-	cLog = $c(wlog,[['colspan',13],['style','background-color: transparent;']]);
-	tbl.tFoot.appendChild($ee('TR',cLog));
-	wCount = tbl.tBodies.length;
-	var nextWave = 10;
-	var intWave = parseInt(interval.value).NaN0();
-	if( intWave < 100 ) intWave = defInterval;
-	for( var i=0; i<wCount; i++ ) {
-		setTimeout(function(x){return function(){ sendTroops(x); };}(i), nextWave);
-		nextWave += getRandom(intWave);
-	}
+        cLog = $c(wlog,[['colspan',13],['style','background-color: transparent;']]);
+        tbl.tFoot.appendChild($ee('TR',cLog));
+        wCount = tbl.tBodies.length;
+        var intWave = parseInt(interval.value).NaN0();
+        if( intWave < 100 ) intWave = defInterval;
+        function queue(i, delay) {
+                if (i >= wCount) return;
+                setTimeout(function(ix){
+                        sendTroops(ix, function(){ queue(ix+1, getRandom(intWave)); });
+                }, delay);
+        }
+        queue(0, 10);
 }
 
 twb_css = "table#twbtable { background-color: transparent; border-collapse: collapse; } " +
